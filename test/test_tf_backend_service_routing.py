@@ -51,9 +51,9 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       condition.1746742835.field:         "path-pattern"
       condition.1746742835.values.#:      "1"
       condition.1746742835.values.0:      "*"
-      condition.1997051849.field:         "host-header"
-      condition.1997051849.values.#:      "1"
-      condition.1997051849.values.0:      "cognito.domain.com"
+      condition.3778616515.field:         "host-header"
+      condition.3778616515.values.#:      "1"
+      condition.3778616515.values.0:      "dev-cognito.domain.com"
       listener_arn:                       "alb:listener"
       priority:                           "10"
         """.strip() in output

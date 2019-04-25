@@ -8,10 +8,8 @@ module "backend_service_routing" {
   priority         = "10"
   alb_listener_arn = "alb:listener"
   alb_dns_name     = "alb.dns.name.com"
-  vpc_id           = "${var.platform_config["vpc"]}"  # optional
-
+  vpc_id           = "${var.platform_config["vpc"]}" # optional
 }
-
 
 # configure provider to not try too hard talking to AWS API
 provider "aws" {

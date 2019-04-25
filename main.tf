@@ -1,5 +1,6 @@
 locals {
-  dns_name = "${var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")}"
+  dns_name  = "${var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")}"
+  host_name = "${var.env == "live" ? "${local.dns_name}.${var.dns_domain}" : "${var.env}-${local.dns_name}.${var.dns_domain}"}"
 }
 
 data "aws_route53_zone" "dns_domain" {
@@ -17,7 +18,7 @@ resource "aws_alb_listener_rule" "rule" {
 
   condition {
     field  = "host-header"
-    values = ["${local.dns_name}.${var.dns_domain}"]
+    values = ["${local.host_name}"]
   }
 
   condition {
