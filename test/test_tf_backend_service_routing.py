@@ -58,6 +58,39 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       priority:                           "10"
         """.strip() in output
 
+    def test_create_alb_listener_rule_live(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=live',
+            '-var', 'aws_region=eu-west-1',
+            '-var-file=test/platform-config/eu-west-1.json',
+            '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
+            '-no-color',
+            'test/infra'
+        ]).decode('utf-8')
+
+        # Then
+        assert """
++ module.backend_service_routing.aws_alb_listener_rule.rule
+      id:                                 <computed>
+      action.#:                           "1"
+      action.0.order:                     <computed>
+      action.0.target_group_arn:          "${aws_alb_target_group.target_group.arn}"
+      action.0.type:                      "forward"
+      arn:                                <computed>
+      condition.#:                        "2"
+      condition.1746742835.field:         "path-pattern"
+      condition.1746742835.values.#:      "1"
+      condition.1746742835.values.0:      "*"
+      condition.1997051849.field:         "host-header"
+      condition.1997051849.values.#:      "1"
+      condition.1997051849.values.0:      "cognito.domain.com"
+      listener_arn:                       "alb:listener"
+      priority:                           "10"
+        """.strip() in output
+
     def test_create_aws_alb_target_group(self):
         # When
         output = check_output([
