@@ -4,6 +4,6 @@ output "target_group_arn" {
 }
 
 output "dns_name" {
-  value       = "${local.dns_name}.${var.dns_domain}"
+  value       = "${local.target_host_name}"
   description = "The DNS name for the service."
 }

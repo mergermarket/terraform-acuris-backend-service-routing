@@ -9,6 +9,8 @@ module "backend_service_routing" {
   alb_listener_arn = "alb:listener"
   alb_dns_name     = "alb.dns.name.com"
   vpc_id           = "${var.platform_config["vpc"]}" # optional
+  aws_account_alias = "${var.aws_account_alias}"
+  backend_dns       = "${var.backend_dns}"
 }
 
 # configure provider to not try too hard talking to AWS API
@@ -30,3 +32,7 @@ variable "env" {}
 variable "platform_config" {
   type = "map"
 }
+
+variable "aws_account_alias" {}
+
+variable "backend_dns" {}

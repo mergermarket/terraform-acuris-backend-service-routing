@@ -14,6 +14,8 @@ class TestTFBackendRouter(unittest.TestCase):
             'plan',
             '-var', 'env=dev',
             '-var', 'aws_region=eu-west-1',
+            '-var', 'aws_account_alias=awsaccount',
+            '-var', 'backend_dns=testbackend.com',
             '-var-file=test/platform-config/eu-west-1.json',
             '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
             '-no-color',
@@ -32,6 +34,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'plan',
             '-var', 'env=dev',
             '-var', 'aws_region=eu-west-1',
+            '-var', 'aws_account_alias=awsaccount',
+            '-var', 'backend_dns=testbackend.com',
             '-var-file=test/platform-config/eu-west-1.json',
             '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
             '-no-color',
@@ -65,6 +69,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'plan',
             '-var', 'env=live',
             '-var', 'aws_region=eu-west-1',
+            '-var', 'aws_account_alias=awsaccount',
+            '-var', 'backend_dns=testbackend.com',
             '-var-file=test/platform-config/eu-west-1.json',
             '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
             '-no-color',
@@ -98,6 +104,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'plan',
             '-var', 'env=dev',
             '-var', 'aws_region=eu-west-1',
+            '-var', 'aws_account_alias=awsaccount',
+            '-var', 'backend_dns=testbackend.com',
             '-var-file=test/platform-config/eu-west-1.json',
             '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
             '-no-color',
@@ -135,3 +143,4 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       target_type:                        "instance"
       vpc_id:                             "vpc-12345678"
         """.strip() in output
+
