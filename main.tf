@@ -1,6 +1,7 @@
 locals {
   logical_dns_service_name = "${var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")}"
-  target_host_name         = "${var.env == "live" ? "" : "${var.env}-"}${local.logical_dns_service_name}.${var.dns_domain}"
+  env_prefix               = "${var.env == "live" ? "" : "${var.env}-"}"
+  target_host_name         = "${local.env_prefix}${local.logical_dns_service_name}.${var.dns_domain}"
 }
 
 resource "aws_alb_listener_rule" "rule" {
