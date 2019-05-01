@@ -1,10 +1,6 @@
 locals {
-  dns_name  = "${var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")}"
-  host_name = "${var.env == "live" ? "${local.dns_name}.${var.dns_domain}" : "${var.env}-${local.dns_name}.${var.dns_domain}"}"
-}
-
-data "aws_route53_zone" "dns_domain" {
-  name = "${var.dns_domain}"
+  logical_dns_service_name = "${var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")}"
+  target_host_name         = "${var.env == "live" ? "" : "${var.env}-"}${local.logical_dns_service_name}.${var.dns_domain}"
 }
 
 resource "aws_alb_listener_rule" "rule" {
@@ -18,7 +14,7 @@ resource "aws_alb_listener_rule" "rule" {
 
   condition {
     field  = "host-header"
-    values = ["${local.host_name}"]
+    values = ["${local.target_host_name}"]
   }
 
   condition {
@@ -65,9 +61,20 @@ resource "aws_alb_target_group" "target_group" {
   }
 }
 
+locals {
+  logical_service_name = "${var.env}-${replace(var.component_name, "/-service$/", "")}"
+  full_account_name    = "${var.env == "live" ? "${var.aws_account_alias}prod" : "${var.aws_account_alias}dev"}"
+  backend_dns_domain   = "${local.full_account_name}.${var.backend_dns}"
+  backend_dns_record   = "${local.logical_service_name}.${local.backend_dns_domain}"
+}
+
+data "aws_route53_zone" "dns_domain" {
+  name = "${local.backend_dns_domain}"
+}
+
 resource "aws_route53_record" "dns_record" {
   zone_id = "${data.aws_route53_zone.dns_domain.zone_id}"
-  name    = "${local.host_name}"
+  name    = "${local.backend_dns_record}"
 
   type            = "CNAME"
   records         = ["${var.alb_dns_name}"]

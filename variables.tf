@@ -15,7 +15,7 @@ variable "override_dns_name" {
 }
 
 variable "dns_domain" {
-  description = "The top level domain the service should live under - e.g. mmgapi.net. If blank (the default) then no DNS record will be created"
+  description = "The top level domain the service should live under. This will be the host used for the rule to route to a target group"
   default     = ""
 }
 
@@ -93,4 +93,14 @@ variable "hash_target_group_name" {
   description = "Include a hash of the target group name when naming it to avoid collisions"
   type        = "string"
   default     = "false"
+}
+
+variable "aws_account_alias" {
+  description = "The AWS account alias where the router is deployed"
+  type        = "string"
+}
+
+variable "backend_dns" {
+  description = "The domain and top level domain used as the address for the ALB"
+  type        = "string"
 }
