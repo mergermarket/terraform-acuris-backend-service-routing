@@ -5,8 +5,6 @@ locals {
 }
 
 resource "aws_alb_listener_rule" "rule" {
-  count = "${length(var.path_conditions)}"
-  
   listener_arn = "${var.alb_listener_arn}"
   priority     = "${var.priority}"
 
@@ -22,7 +20,7 @@ resource "aws_alb_listener_rule" "rule" {
 
   condition {
     field  = "path-pattern"
-    values = ["${element(var.path_conditions, count.index)}"]
+    values = ["${var.path_conditions}"]
   }
 }
 
