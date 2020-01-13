@@ -20,7 +20,7 @@ resource "aws_alb_listener_rule" "rule" {
 
   condition {
     field  = "path-pattern"
-    values = ["*"]
+    values = ["${var.path_conditions}"]
   }
 }
 
