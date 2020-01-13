@@ -104,6 +104,12 @@ variable "override_dns_name" {
   default     = ""
 }
 
+variable "path_conditions" {
+  description = "Defines path-based conditions for routing - e.g. ['/home', '/home/*']"
+  type        = "list"
+  default     = ["*"]
+}
+
 variable "ttl" {
   description = "Time to live"
   default     = "60"
