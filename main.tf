@@ -1,6 +1,6 @@
 locals {
-  dns_name  = "${var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")}"
-  host_name = "${var.env == "live" ? "${local.dns_name}.${var.dns_domain}" : "${var.env}-${local.dns_name}.${var.dns_domain}"}"
+  stripped_component_name  = "${var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")}"
+  dns_name = "${var.env == "live" ? "${local.stripped_component_name}.${var.dns_domain}" : "${var.env}-${local.stripped_component_name}.${var.dns_domain}"}"
 }
 
 data "aws_route53_zone" "dns_domain" {
@@ -18,7 +18,7 @@ resource "aws_alb_listener_rule" "rule" {
 
   condition {
     field  = "host-header"
-    values = ["${local.host_name}"]
+    values = ["${local.dns_name}"]
   }
 
   condition {
@@ -67,7 +67,7 @@ resource "aws_alb_target_group" "target_group" {
 
 resource "aws_route53_record" "dns_record" {
   zone_id = "${data.aws_route53_zone.dns_domain.zone_id}"
-  name    = "${local.host_name}"
+  name    = "${local.dns_name}"
 
   type            = "CNAME"
   records         = ["${var.alb_dns_name}"]
