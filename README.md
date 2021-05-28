@@ -1,7 +1,7 @@
 Description
 ===========
 
-[![Build Status](https://travis-ci.org/mergermarket/terraform-acuris-backend-service-routing.svg?branch=master)](https://travis-ci.org/mergermarket/terraform-acuris-backend-service-routing)
+[![Build Status](https://travis-ci.com/mergermarket/terraform-acuris-backend-service-routing.svg?branch=master)](https://travis-ci.com/mergermarket/terraform-acuris-backend-service-routing)
 
 This module creates the DNS and routing rule for a backend service. It's an opinionated module that forms the DNS name from the `env` (environment name), `name` (short name for the service - typically with the "-service" suffix removed) and `domain`.
 
