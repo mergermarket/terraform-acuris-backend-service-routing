@@ -14,14 +14,17 @@ resource "aws_alb_listener_rule" "rule" {
   }
 
   condition {
-    field  = "host-header"
-    values = ["${local.target_host_name}"]
+    host_header {
+      values = ["${local.target_host_name}"]
+    }
   }
 
   condition {
-    field  = "path-pattern"
-    values = ["*"]
+    path_pattern {
+      values = ["*"]
+    }
   }
+
 }
 
 locals {
