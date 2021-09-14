@@ -108,3 +108,8 @@ variable "ttl" {
   description = "Time to live"
   default     = "60"
 }
+
+variable "target_type" {
+  description = "The possible values are instance (targets are specified by instance ID) or ip (targets are specified by IP address) or lambda (targets are specified by lambda arn)"
+  default     = "instance"
+}

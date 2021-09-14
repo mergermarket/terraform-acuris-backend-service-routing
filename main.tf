@@ -14,14 +14,17 @@ resource "aws_alb_listener_rule" "rule" {
   }
 
   condition {
-    field  = "host-header"
-    values = ["${local.target_host_name}"]
+    host_header {
+      values = ["${local.target_host_name}"]
+    }
   }
 
   condition {
-    field  = "path-pattern"
-    values = ["*"]
+    path_pattern {
+      values = ["*"]
+    }
   }
+
 }
 
 locals {
@@ -41,6 +44,7 @@ resource "aws_alb_target_group" "target_group" {
   protocol             = "HTTP"
   vpc_id               = "${var.vpc_id}"
   deregistration_delay = "${var.deregistration_delay}"
+  target_type          = "${var.target_type}"
 
   health_check {
     interval            = "${var.health_check_interval}"
