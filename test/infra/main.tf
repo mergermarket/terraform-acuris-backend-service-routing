@@ -2,15 +2,15 @@
 module "backend_service_routing" {
   source = "../.."
 
-  env              = "${var.env}"
-  component_name   = "cognito-service"
-  dns_domain       = "domain.com"
-  priority         = "10"
-  alb_listener_arn = "alb:listener"
-  alb_dns_name     = "alb.dns.name.com"
-  vpc_id           = "${var.platform_config["vpc"]}" # optional
-  aws_account_alias = "${var.aws_account_alias}"
-  backend_dns       = "${var.backend_dns}"
+  env               = var.env
+  component_name    = "cognito-service"
+  dns_domain        = "domain.com"
+  priority          = "10"
+  alb_listener_arn  = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
+  alb_dns_name      = "alb.dns.name.com"
+  vpc_id            = var.platform_config["vpc"]
+  aws_account_alias = var.aws_account_alias
+  backend_dns       = var.backend_dns
 }
 
 # configure provider to not try too hard talking to AWS API
@@ -30,7 +30,7 @@ provider "aws" {
 variable "env" {}
 
 variable "platform_config" {
-  type = "map"
+  type = map(string)
 }
 
 variable "aws_account_alias" {}
