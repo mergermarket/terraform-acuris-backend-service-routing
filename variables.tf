@@ -113,3 +113,9 @@ variable "target_type" {
   description = "The possible values are instance (targets are specified by instance ID) or ip (targets are specified by IP address) or lambda (targets are specified by lambda arn)"
   default     = "instance"
 }
+
+variable "extra_listener_host_names" {
+  description = "A list of hostname to be included in the host header for the ALB listener rule"
+  type        = list(string)
+  default     = []
+}
