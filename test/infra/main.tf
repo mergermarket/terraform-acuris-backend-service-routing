@@ -11,6 +11,8 @@ module "backend_service_routing" {
   vpc_id            = var.platform_config["vpc"]
   aws_account_alias = var.aws_account_alias
   backend_dns       = var.backend_dns
+
+  extra_listener_host_names = var.extra_listener_host_names
 }
 
 # configure provider to not try too hard talking to AWS API
@@ -36,3 +38,8 @@ variable "platform_config" {
 variable "aws_account_alias" {}
 
 variable "backend_dns" {}
+
+variable "extra_listener_host_names" {
+  type = list(string)
+  default = []
+}

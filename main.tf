@@ -2,6 +2,7 @@ locals {
   logical_dns_service_name = var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")
   env_prefix               = var.env == "live" ? "" : "${var.env}-"
   target_host_name         = "${local.env_prefix}${local.logical_dns_service_name}.${var.dns_domain}"
+  host_header_host_names   = concat([local.target_host_name], var.extra_listener_host_names)
 }
 
 resource "aws_alb_listener_rule" "rule" {
@@ -15,7 +16,7 @@ resource "aws_alb_listener_rule" "rule" {
 
   condition {
     host_header {
-      values = ["${local.target_host_name}"]
+      values = local.host_header_host_names
     }
   }
 
