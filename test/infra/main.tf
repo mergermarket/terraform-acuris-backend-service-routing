@@ -12,7 +12,8 @@ module "backend_service_routing" {
   aws_account_alias = var.aws_account_alias
   backend_dns       = var.backend_dns
 
-  extra_listener_host_names = var.extra_listener_host_names
+  extra_listener_host_names        = var.extra_listener_host_names
+  extra_listener_http_header_pairs = var.extra_listener_http_header_pairs
 }
 
 # configure provider to not try too hard talking to AWS API
@@ -40,6 +41,15 @@ variable "aws_account_alias" {}
 variable "backend_dns" {}
 
 variable "extra_listener_host_names" {
-  type = list(string)
+  type    = list(string)
+  default = []
+}
+
+variable "extra_listener_http_header_pairs" {
+  description = "A list of HTTP headers to be included in the http header condition for the ALB listener rule"
+  type        = list(object({
+    http_header_name = string,
+    values           = set(string)
+  }))
   default = []
 }
