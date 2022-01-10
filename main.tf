@@ -26,10 +26,19 @@ resource "aws_alb_listener_rule" "rule" {
     }
   }
 
+  dynamic "condition" {
+    for_each = var.extra_listener_http_header_pairs
+    content {
+      http_header {
+        http_header_name = condition.value.http_header_name
+        values           = condition.value.values
+      }
+    }
+  }
 }
 
 locals {
-  old_target_group_name     = "${replace(replace("${var.env}-${var.component_name}", "/(.{0,32}).*/", "$1"), "/^-+|-+$/", "")}"
+  old_target_group_name = "${replace(replace("${var.env}-${var.component_name}", "/(.{0,32}).*/", "$1"), "/^-+|-+$/", "")}"
 
   target_group_name_hash    = "${base64encode(base64sha256("${var.env}-${var.component_name}"))}"
   target_group_name_postfix = "${replace(replace("${local.target_group_name_hash}", "/(.{0,12}).*/", "$1"), "/^-+|-+$/", "")}"
