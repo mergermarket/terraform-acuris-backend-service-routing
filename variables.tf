@@ -119,3 +119,12 @@ variable "extra_listener_host_names" {
   type        = list(string)
   default     = []
 }
+
+variable "extra_listener_http_header_pairs" {
+  description = "A list of HTTP headers to be included in the http header condition for the ALB listener rule"
+  type        = list(object({
+    http_header_name = string,
+    values           = set(string)
+  }))
+  default     = []
+}

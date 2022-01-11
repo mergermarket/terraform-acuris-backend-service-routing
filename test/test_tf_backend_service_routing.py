@@ -170,6 +170,63 @@ Plan: 2 to add, 0 to change, 0 to destroy.
         }
     }    """.strip() in output
 
+    def test_create_alb_listener_rule_extra_headers(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=live',
+            '-var', 'aws_account_alias=awsaccount',
+            '-var', 'backend_dns=testbackend.com',
+            '-var', 'extra_listener_http_header_pairs=[{"http_header_name":"osh_was","values":["here"]}]',
+            '-var-file=test/platform-config/eu-west-1.json',
+            '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
+            '-no-color',
+            'test/infra'
+        ]).decode('utf-8')
+
+        # Then
+        assert """
+  # module.backend_service_routing.aws_alb_listener_rule.rule will be created
+  + resource "aws_alb_listener_rule" "rule" {
+      + arn          = (known after apply)
+      + id           = (known after apply)
+      + listener_arn = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
+      + priority     = 10
+      + tags_all     = (known after apply)
+
+      + action {
+          + order            = (known after apply)
+          + target_group_arn = (known after apply)
+          + type             = "forward"
+        }
+
+      + condition {
+          + host_header {
+              + values = [
+                  + "cognito.domain.com",
+                ]
+            }
+        }
+      + condition {
+
+          + http_header {
+              + http_header_name = "osh_was"
+              + values           = [
+                  + "here",
+                ]
+            }
+        }
+      + condition {
+
+          + path_pattern {
+              + values = [
+                  + "*",
+                ]
+            }
+        }
+    }    """.strip() in output
+
     def test_create_aws_alb_target_group(self):
         # When
         output = check_output([
