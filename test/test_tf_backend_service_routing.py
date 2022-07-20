@@ -247,6 +247,7 @@ Plan: 2 to add, 0 to change, 0 to destroy.
   + resource "aws_alb_target_group" "target_group" {
       + arn                                = (known after apply)
       + arn_suffix                         = (known after apply)
+      + connection_termination             = false
       + deregistration_delay               = "10"
       + id                                 = (known after apply)
       + lambda_multi_value_headers_enabled = false

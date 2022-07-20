@@ -81,6 +81,7 @@ locals {
   full_account_name    = "${var.env == "live" ? "${var.aws_account_alias}prod" : "${var.aws_account_alias}dev"}"
   backend_dns_domain   = "${local.full_account_name}.${var.backend_dns}"
   backend_dns_record   = "${local.logical_service_name}.${local.backend_dns_domain}"
+  simple_backend_dns_record = "${local.env_prefix}${replace(var.component_name, "/-service$/", "")}.${local.backend_dns_domain}"
 }
 
 data "aws_route53_zone" "dns_domain" {
@@ -89,7 +90,7 @@ data "aws_route53_zone" "dns_domain" {
 
 resource "aws_route53_record" "dns_record" {
   zone_id = data.aws_route53_zone.dns_domain.zone_id
-  name    = local.backend_dns_record
+  name    = var.simple_dns_name ? local.simple_backend_dns_record : local.backend_dns_record
 
   type            = "CNAME"
   records         = [var.alb_dns_name]

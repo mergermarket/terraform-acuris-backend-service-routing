@@ -128,3 +128,9 @@ variable "extra_listener_http_header_pairs" {
   }))
   default     = []
 }
+
+variable "simple_dns_name" {
+  description = "simplify the name of route53 dns in live env"
+  type = bool
+  default = false
+}
