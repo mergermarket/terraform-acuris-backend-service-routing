@@ -77,7 +77,8 @@ resource "aws_alb_target_group" "target_group" {
 }
 
 locals {
-  logical_service_name = "${var.env}-${replace(var.component_name, "/-service$/", "")}"
+  # logical_service_name = "${var.env}-${replace(var.component_name, "/-service$/", "")}"
+  logical_service_name = "${var.env == "live" && var.aws_account_alias == "" ? replace(var.component_name, "/-service$/", "") : "${var.env}-${replace(var.component_name, "/-service$/", "")}"}"
   # full_account_name    = "${var.env == "live" ? "${var.aws_account_alias}prod" : "${var.aws_account_alias}dev"}"
   full_account_name    = "${var.env == "live" ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."}"
   backend_dns_domain   = "${local.full_account_name}${var.backend_dns}"
