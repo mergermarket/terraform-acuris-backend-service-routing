@@ -4,6 +4,6 @@ output "target_group_arn" {
 }
 
 output "dns_name" {
-  value       = "${local.target_host_name}"
+  value       = "${aws_route53_record.dns_record.fqdn}"
   description = "The DNS name for the service."
 }
