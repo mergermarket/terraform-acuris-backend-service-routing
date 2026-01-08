@@ -38,12 +38,15 @@ resource "aws_alb_listener_rule" "rule" {
 }
 
 locals {
-  old_target_group_name = "${replace(replace(replace("${var.env}-${var.component_name}", "/(.{0,32}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
+  simplified_env = can(split("_", var.env)) ? split("_", var.env)[0] : var.env
 
-  target_group_name_hash    = "${base64encode(base64sha256("${var.env}-${var.component_name}"))}"
+  old_target_group_name = "${replace(replace(replace("${local.simplified_env}-${var.component_name}", "/(.{0,32}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
+
+  target_group_name_hash    = "${base64encode(base64sha256("${local.simplified_env}-${var.component_name}"))}"
   target_group_name_postfix = "${replace(replace(replace("${local.target_group_name_hash}", "/(.{0,12}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
-  target_group_name_prefix  = "${replace(replace(replace("${var.env}-${var.component_name}", "/(.{0,20}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
+  target_group_name_prefix  = "${replace(replace(replace("${local.simplified_env}-${var.component_name}", "/(.{0,20}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
   target_group_name         = "${local.target_group_name_prefix}${local.target_group_name_postfix}"
+  
 }
 
 resource "aws_alb_target_group" "target_group" {
