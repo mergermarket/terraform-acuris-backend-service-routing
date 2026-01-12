@@ -20,13 +20,21 @@ module "backend_service_routing" {
 provider "aws" {
   skip_credentials_validation = true
   skip_metadata_api_check     = true
-  skip_get_ec2_platforms      = true
   skip_region_validation      = true
   skip_requesting_account_id  = true
   max_retries                 = 1
   access_key                  = "a"
   secret_key                  = "a"
   region                      = "eu-west-1"
+}
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.28.0"
+    }
+  }
 }
 
 # variables

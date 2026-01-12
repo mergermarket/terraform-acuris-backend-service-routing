@@ -1,5 +1,5 @@
-FROM python:3-alpine
-COPY requirements.txt .
+FROM python:3.9-alpine
+COPY requirements.txt . 
 
 ENV TERRAFORM_VERSION=0.13.2
 ENV TERRAFORM_ZIP=terraform_${TERRAFORM_VERSION}_linux_amd64.zip

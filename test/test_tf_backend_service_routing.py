@@ -40,6 +40,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'test/infra'
         ]).decode('utf-8')
 
+        print(output)
+
         # Then
         assert """
   # module.backend_service_routing.aws_alb_listener_rule.rule will be created
@@ -48,6 +50,7 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + id           = (known after apply)
       + listener_arn = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
       + priority     = 10
+      + region       = "eu-west-1"
       + tags_all     = (known after apply)
 
       + action {
@@ -58,7 +61,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
 
       + condition {
           + host_header {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "dev-cognito.domain.com",
                 ]
             }
@@ -66,12 +70,14 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + condition {
 
           + path_pattern {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "*",
                 ]
             }
         }
-    }       """.strip() in output
+    } 
+        """.strip() in output
 
     def test_create_alb_listener_rule_live(self):
         # When
@@ -87,6 +93,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'test/infra'
         ]).decode('utf-8')
 
+        print(output)
+
         # Then
         assert """
   # module.backend_service_routing.aws_alb_listener_rule.rule will be created
@@ -95,6 +103,7 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + id           = (known after apply)
       + listener_arn = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
       + priority     = 10
+      + region       = "eu-west-1"
       + tags_all     = (known after apply)
 
       + action {
@@ -105,7 +114,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
 
       + condition {
           + host_header {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "cognito.domain.com",
                 ]
             }
@@ -113,12 +123,14 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + condition {
 
           + path_pattern {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "*",
                 ]
             }
         }
-    }    """.strip() in output
+    }
+        """.strip() in output
 
     def test_create_alb_listener_rule_extrahosts(self):
         # When
@@ -135,6 +147,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'test/infra'
         ]).decode('utf-8')
 
+        print(output)
+
         # Then
         assert """
   # module.backend_service_routing.aws_alb_listener_rule.rule will be created
@@ -143,6 +157,7 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + id           = (known after apply)
       + listener_arn = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
       + priority     = 10
+      + region       = "eu-west-1"
       + tags_all     = (known after apply)
 
       + action {
@@ -153,7 +168,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
 
       + condition {
           + host_header {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "cognito.domain.com",
                   + "example.com",
                   + "test.com",
@@ -163,7 +179,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + condition {
 
           + path_pattern {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "*",
                 ]
             }
@@ -185,6 +202,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'test/infra'
         ]).decode('utf-8')
 
+        print(output)
+
         # Then
         assert """
   # module.backend_service_routing.aws_alb_listener_rule.rule will be created
@@ -193,6 +212,7 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + id           = (known after apply)
       + listener_arn = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
       + priority     = 10
+      + region       = "eu-west-1"
       + tags_all     = (known after apply)
 
       + action {
@@ -203,7 +223,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
 
       + condition {
           + host_header {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "cognito.domain.com",
                 ]
             }
@@ -212,6 +233,7 @@ Plan: 2 to add, 0 to change, 0 to destroy.
 
           + http_header {
               + http_header_name = "osh_was"
+              + regex_values     = []
               + values           = [
                   + "here",
                 ]
@@ -220,7 +242,8 @@ Plan: 2 to add, 0 to change, 0 to destroy.
       + condition {
 
           + path_pattern {
-              + values = [
+              + regex_values = []
+              + values       = [
                   + "*",
                 ]
             }
@@ -241,23 +264,31 @@ Plan: 2 to add, 0 to change, 0 to destroy.
             'test/infra'
         ]).decode('utf-8')
 
+        print(output)
+
         # Then
         assert """
   # module.backend_service_routing.aws_alb_target_group.target_group will be created
   + resource "aws_alb_target_group" "target_group" {
       + arn                                = (known after apply)
       + arn_suffix                         = (known after apply)
-      + connection_termination             = false
+      + connection_termination             = (known after apply)
       + deregistration_delay               = "10"
       + id                                 = (known after apply)
+      + ip_address_type                    = (known after apply)
       + lambda_multi_value_headers_enabled = false
+      + load_balancer_arns                 = (known after apply)
       + load_balancing_algorithm_type      = (known after apply)
+      + load_balancing_anomaly_mitigation  = (known after apply)
+      + load_balancing_cross_zone_enabled  = (known after apply)
       + name                               = "dev-cognito-service"
+      + name_prefix                        = (known after apply)
       + port                               = 31337
       + preserve_client_ip                 = (known after apply)
       + protocol                           = "HTTP"
       + protocol_version                   = (known after apply)
       + proxy_protocol_v2                  = false
+      + region                             = "eu-west-1"
       + slow_start                         = 0
       + tags                               = {
           + "component" = "cognito-service"
@@ -289,5 +320,27 @@ Plan: 2 to add, 0 to change, 0 to destroy.
           + cookie_name     = (known after apply)
           + enabled         = (known after apply)
           + type            = (known after apply)
+        }
+
+      + target_failover {
+          + on_deregistration = (known after apply)
+          + on_unhealthy      = (known after apply)
+        }
+
+      + target_group_health {
+          + dns_failover {
+              + minimum_healthy_targets_count      = (known after apply)
+              + minimum_healthy_targets_percentage = (known after apply)
+            }
+
+          + unhealthy_state_routing {
+              + minimum_healthy_targets_count      = (known after apply)
+              + minimum_healthy_targets_percentage = (known after apply)
+            }
+        }
+
+      + target_health_state {
+          + enable_unhealthy_connection_termination = (known after apply)
+          + unhealthy_draining_interval             = (known after apply)
         }
     }    """.strip() in output
