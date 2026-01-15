@@ -1,6 +1,7 @@
 locals {
   logical_dns_service_name = var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")
-  env_prefix               = var.env == "live" ? "" : "${var.env}-"
+  fixed_env_name           = replace(var.env, "_", "-")
+  env_prefix               = var.env == "live" ? "" : "${local.fixed_env_name}-"
   target_host_name         = "${local.env_prefix}${local.logical_dns_service_name}.${var.dns_domain}"
   host_header_host_names   = concat([local.target_host_name], var.extra_listener_host_names)
 }
