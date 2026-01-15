@@ -81,7 +81,6 @@ resource "aws_alb_target_group" "target_group" {
 }
 
 locals {
-  fixed_env_name       = replace(var.env, "_", "-")
   logical_service_name = "${can(regex("^live(_.+)?$", var.env)) && var.aws_account_alias == "" ? replace(var.component_name, "/-service$/", "") : "${local.fixed_env_name}-${replace(var.component_name, "/-service$/", "")}"}"
   full_account_name    = "${can(regex("^live(_.+)?$", var.env)) ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."}"
   backend_dns_domain   = "${local.full_account_name}${var.backend_dns}"
