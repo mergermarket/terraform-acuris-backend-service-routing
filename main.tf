@@ -1,6 +1,7 @@
 locals {
   logical_dns_service_name = var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")
-  env_prefix               = var.env == "live" ? "" : "${var.env}-"
+  fixed_env_name           = replace(var.env, "_", "-")
+  env_prefix               = var.env == "live" ? "" : "${local.fixed_env_name}-"
   target_host_name         = "${local.env_prefix}${local.logical_dns_service_name}.${var.dns_domain}"
   host_header_host_names   = concat([local.target_host_name], var.extra_listener_host_names)
 }
@@ -80,9 +81,7 @@ resource "aws_alb_target_group" "target_group" {
 }
 
 locals {
-  # logical_service_name = "${var.env}-${replace(var.component_name, "/-service$/", "")}"
-  logical_service_name = "${can(regex("^live(_.+)?$", var.env)) && var.aws_account_alias == "" ? replace(var.component_name, "/-service$/", "") : "${var.env}-${replace(var.component_name, "/-service$/", "")}"}"
-  # full_account_name    = "${var.env == "live" ? "${var.aws_account_alias}prod" : "${var.aws_account_alias}dev"}"
+  logical_service_name = "${can(regex("^live(_.+)?$", var.env)) && var.aws_account_alias == "" ? replace(var.component_name, "/-service$/", "") : "${local.fixed_env_name}-${replace(var.component_name, "/-service$/", "")}"}"
   full_account_name    = "${can(regex("^live(_.+)?$", var.env)) ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."}"
   backend_dns_domain   = "${local.full_account_name}${var.backend_dns}"
   backend_dns_record   = "${local.logical_service_name}.${local.backend_dns_domain}"
