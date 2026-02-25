@@ -67,6 +67,7 @@ resource "aws_alb_target_group" "target_group" {
     healthy_threshold   = var.health_check_healthy_threshold
     unhealthy_threshold = var.health_check_unhealthy_threshold
     matcher             = var.health_check_matcher
+    port                = var.health_check_port != "" ? var.health_check_port : "traffic-port"
   }
 
   lifecycle {
