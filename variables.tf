@@ -134,3 +134,9 @@ variable "simple_dns_name" {
   type = bool
   default = false
 }
+
+variable "health_check_port" {
+  description = "The port the load balancer uses when performing health checks on targets. The default is traffic-port, which is the port on which each target receives traffic from the load balancer."
+  type        = string
+  default     = ""
+}
