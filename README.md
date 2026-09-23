@@ -29,13 +29,15 @@ module "cognito_service" {
     source  = "mergermarket/backend-service-routing/acuris"
     version = "0.0.2"
 
-    env              = "${var.env}"
+    env              = var.env
     component_name   = "cognito-service"
-    dns_domain       = "${var.dns_domain}"
+    dns_domain       = var.dns_domain
     priority         = "10"
-    alb_listener_arn = "${module.backend_router.alb_listener_arn}"
-    alb_dns_name     = "${module.backend_router.alb_dns_name}"
-    vpc_id           = "${var.platform_config["vpc"]}"
+    alb_listener_arn = module.backend_router.alb_listener_arn
+    alb_dns_name     = module.backend_router.alb_dns_name
+    vpc_id           = var.platform_config["vpc"]
+    aws_account_alias = var.aws_account_alias
+    backend_dns      = var.backend_dns
 }
 ```
 
@@ -48,6 +50,30 @@ Then put the ARN for the target group of your service in each environment into `
         }
     }
 ```
+
+### Overriding DNS Names
+
+If you need to customize the DNS name (for example, to use a different name than the component name), you can use the `override_dns_name` variable:
+
+```hcl
+module "cognito_service" {
+    source  = "mergermarket/backend-service-routing/acuris"
+    version = "0.0.2"
+
+    env              = var.env
+    component_name   = "cognito-service"
+    override_dns_name = "custom-name"  # Will use this instead of "cognito" in DNS
+    dns_domain       = var.dns_domain
+    priority         = "10"
+    alb_listener_arn = module.backend_router.alb_listener_arn
+    alb_dns_name     = module.backend_router.alb_dns_name
+    vpc_id           = var.platform_config["vpc"]
+    aws_account_alias = var.aws_account_alias
+    backend_dns      = var.backend_dns
+}
+```
+
+This will be used consistently for both the ALB listener host header and the Route53 DNS record.
 
 Architecture
 ------------
