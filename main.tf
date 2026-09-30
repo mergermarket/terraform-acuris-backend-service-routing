@@ -4,7 +4,9 @@ locals {
 
   # Environment handling
   fixed_env_name = replace(var.env, "_", "-")
-  env_prefix     = var.env == "live" ? "" : "${local.fixed_env_name}-"
+  # Drop the "live-" from secondary live envs (e.g. live_eu_west_2 -> eu-west-2) but keep the region; plain "live" is unchanged
+  dns_env_name = replace(local.fixed_env_name, "/^live-(.+)$/", "$1")
+  env_prefix   = var.env == "live" ? "" : "${local.dns_env_name}-"
 
   # ALB listener host name
   target_host_name       = "${local.env_prefix}${local.base_service_name}.${var.dns_domain}"
@@ -44,15 +46,14 @@ resource "aws_alb_listener_rule" "rule" {
 }
 
 locals {
-  simplified_env = can(split("_", var.env)) ? split("_", var.env)[0] : var.env
+  simplified_env = split("_", var.env)[0]
+  tg_key         = "${local.simplified_env}-${var.component_name}"
 
-  old_target_group_name = "${replace(replace(replace("${local.simplified_env}-${var.component_name}", "/(.{0,32}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
-
-  target_group_name_hash    = "${base64encode(base64sha256("${local.simplified_env}-${var.component_name}"))}"
-  target_group_name_postfix = "${replace(replace(replace("${local.target_group_name_hash}", "/(.{0,12}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
-  target_group_name_prefix  = "${replace(replace(replace("${local.simplified_env}-${var.component_name}", "/(.{0,20}).*/", "$1"), "/^-+|-+$/", ""),"_","-")}"
+  # truncate to n chars, trim leading/trailing "-", swap "_" for "-"
+  old_target_group_name     = replace(replace(replace(local.tg_key, "/(.{0,32}).*/", "$1"), "/^-+|-+$/", ""), "_", "-")
+  target_group_name_prefix  = replace(replace(replace(local.tg_key, "/(.{0,20}).*/", "$1"), "/^-+|-+$/", ""), "_", "-")
+  target_group_name_postfix = replace(replace(replace(base64encode(base64sha256(local.tg_key)), "/(.{0,12}).*/", "$1"), "/^-+|-+$/", ""), "_", "-")
   target_group_name         = "${local.target_group_name_prefix}${local.target_group_name_postfix}"
-  
 }
 
 resource "aws_alb_target_group" "target_group" {
@@ -87,7 +88,8 @@ resource "aws_alb_target_group" "target_group" {
 
 locals {
   # Route53 DNS name - reuses base_service_name to respect override_dns_name
-  logical_service_name = var.env == "live" && var.aws_account_alias == "" ? local.base_service_name : "${local.fixed_env_name}-${local.base_service_name}"
+  # live keeps its "live-" prefix in Route53 only when an account alias is set
+  logical_service_name = "${var.env == "live" && var.aws_account_alias != "" ? "live-" : local.env_prefix}${local.base_service_name}"
 
   full_account_name         = can(regex("^live(_.+)?$", var.env)) ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."
   backend_dns_domain        = "${local.full_account_name}${var.backend_dns}"
