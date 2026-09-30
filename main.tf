@@ -87,16 +87,12 @@ resource "aws_alb_target_group" "target_group" {
 
 locals {
   # Route53 DNS name - reuses base_service_name to respect override_dns_name
-  # Secondary live regions (e.g. live_eu_west_2) drop the "live" part, leaving the region (eu-west-2-)
-  dns_env_name = replace(replace(var.env, "/^live_(.+)$/", "$1"), "_", "-")
-  dns_env_prefix = var.env == "live" ? "" : "${local.dns_env_name}-"
-
-  logical_service_name = var.env == "live" && var.aws_account_alias == "" ? local.base_service_name : "${local.dns_env_name}-${local.base_service_name}"
+  logical_service_name = var.env == "live" && var.aws_account_alias == "" ? local.base_service_name : "${local.fixed_env_name}-${local.base_service_name}"
 
   full_account_name         = can(regex("^live(_.+)?$", var.env)) ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."
   backend_dns_domain        = "${local.full_account_name}${var.backend_dns}"
   backend_dns_record        = "${local.logical_service_name}.${local.backend_dns_domain}"
-  simple_backend_dns_record = "${local.dns_env_prefix}${local.base_service_name}.${local.backend_dns_domain}"
+  simple_backend_dns_record = "${local.env_prefix}${local.base_service_name}.${local.backend_dns_domain}"
 }
 
 data "aws_route53_zone" "dns_domain" {
