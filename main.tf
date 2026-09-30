@@ -1,14 +1,17 @@
+module "naming" {
+  source = "./modules/naming"
+
+  env               = var.env
+  component_name    = var.component_name
+  override_dns_name = var.override_dns_name
+  dns_domain        = var.dns_domain
+  aws_account_alias = var.aws_account_alias
+  backend_dns       = var.backend_dns
+  simple_dns_name   = var.simple_dns_name
+}
+
 locals {
-  # Base service name - computed once, respects override_dns_name
-  base_service_name = var.override_dns_name != "" ? var.override_dns_name : replace(var.component_name, "/-service$/", "")
-
-  # Environment handling
-  fixed_env_name = replace(var.env, "_", "-")
-  env_prefix     = var.env == "live" ? "" : "${local.fixed_env_name}-"
-
-  # ALB listener host name
-  target_host_name       = "${local.env_prefix}${local.base_service_name}.${var.dns_domain}"
-  host_header_host_names = concat([local.target_host_name], var.extra_listener_host_names)
+  host_header_host_names = concat([module.naming.target_host_name], var.extra_listener_host_names)
 }
 
 resource "aws_alb_listener_rule" "rule" {
@@ -85,23 +88,13 @@ resource "aws_alb_target_group" "target_group" {
   }
 }
 
-locals {
-  # Route53 DNS name - reuses base_service_name to respect override_dns_name
-  logical_service_name = var.env == "live" && var.aws_account_alias == "" ? local.base_service_name : "${local.fixed_env_name}-${local.base_service_name}"
-
-  full_account_name         = can(regex("^live(_.+)?$", var.env)) ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."
-  backend_dns_domain        = "${local.full_account_name}${var.backend_dns}"
-  backend_dns_record        = "${local.logical_service_name}.${local.backend_dns_domain}"
-  simple_backend_dns_record = "${local.env_prefix}${local.base_service_name}.${local.backend_dns_domain}"
-}
-
 data "aws_route53_zone" "dns_domain" {
-  name = local.backend_dns_domain
+  name = module.naming.backend_dns_domain
 }
 
 resource "aws_route53_record" "dns_record" {
   zone_id = data.aws_route53_zone.dns_domain.zone_id
-  name    = var.simple_dns_name ? local.simple_backend_dns_record : local.backend_dns_record
+  name    = module.naming.dns_record_name
 
   type            = "CNAME"
   records         = [var.alb_dns_name]

@@ -132,6 +132,59 @@ Plan: 2 to add, 0 to change, 0 to destroy.
     }
         """.strip() in output
 
+    def test_create_alb_listener_rule_live_secondary_region(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=live_eu_west_2',
+            '-var', 'aws_account_alias=awsaccount',
+            '-var', 'backend_dns=testbackend.com',
+            '-var-file=test/platform-config/eu-west-1.json',
+            '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
+            '-no-color',
+            'test/infra'
+        ]).decode('utf-8')
+
+        print(output)
+
+        # Then
+        assert """
+  # module.backend_service_routing.aws_alb_listener_rule.rule will be created
+  + resource "aws_alb_listener_rule" "rule" {
+      + arn          = (known after apply)
+      + id           = (known after apply)
+      + listener_arn = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
+      + priority     = 10
+      + region       = "eu-west-1"
+      + tags_all     = (known after apply)
+
+      + action {
+          + order            = (known after apply)
+          + target_group_arn = (known after apply)
+          + type             = "forward"
+        }
+
+      + condition {
+          + host_header {
+              + regex_values = []
+              + values       = [
+                  + "eu-west-2-cognito.domain.com",
+                ]
+            }
+        }
+      + condition {
+
+          + path_pattern {
+              + regex_values = []
+              + values       = [
+                  + "*",
+                ]
+            }
+        }
+    }
+        """.strip() in output
+
     def test_create_alb_listener_rule_extrahosts(self):
         # When
         output = check_output([
