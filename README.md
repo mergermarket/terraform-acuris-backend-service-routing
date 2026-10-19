@@ -75,6 +75,42 @@ module "cognito_service" {
 
 This will be used consistently for both the ALB listener host header and the Route53 DNS record.
 
+### Simple Route53 DNS Names
+
+By default the Route53 record is prefixed with the environment, so a regional live environment such as `live_eu-west-2` gets `live-eu-west-2-name`. Set `simple_dns_name = true` to drop the `live-` part and keep only the region:
+
+```hcl
+module "cognito_service" {
+    source  = "mergermarket/backend-service-routing/acuris"
+    version = "0.0.2"
+
+    env               = var.env  # e.g. "live_eu-west-2"
+    component_name    = "cognito-service"
+    simple_dns_name   = true
+    # ... other variables as above
+}
+```
+
+Resulting Route53 record name for component `cognito-service` (with `aws_account_alias = "acme"`, `backend_dns = "example.com"`):
+
+| `env`            | `simple_dns_name = false`                          | `simple_dns_name = true`                     |
+|------------------|----------------------------------------------------|----------------------------------------------|
+| `live`           | `live-cognito.acmeprod.example.com`                | `cognito.acmeprod.example.com`               |
+| `live_eu-west-2` | `live-eu-west-2-cognito.acmeprod.example.com`      | `eu-west-2-cognito.acmeprod.example.com`     |
+| `live-eu-west-2` | `live-eu-west-2-cognito.acmedev.example.com`       | `eu-west-2-cognito.acmedev.example.com`      |
+| `qa`             | `qa-cognito.acmedev.example.com`                   | `qa-cognito.acmedev.example.com`             |
+
+Notes:
+
+- With `env = "live"` and an empty `aws_account_alias`, both modes give `cognito.<backend_dns>`.
+- Only `live` and `live_<suffix>` (underscore) select the `<alias>prod.` zone; a hyphenated `live-<suffix>` env resolves to `<alias>dev.`.
+- `simple_dns_name` only affects the Route53 record. The ALB listener host-header rule still uses the environment prefix (e.g. `live-eu-west-2-cognito.<dns_domain>`), so add the Route53 name to `extra_listener_host_names` if clients will call the service by it.
+
+Testing
+-------
+
+Tests run in Docker with `test/run.sh`. `test/test_naming.py` covers the Route53 naming rules (`modules/route53_name`) without calling AWS.
+
 Architecture
 ------------
 

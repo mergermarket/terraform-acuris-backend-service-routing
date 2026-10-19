@@ -85,23 +85,23 @@ resource "aws_alb_target_group" "target_group" {
   }
 }
 
-locals {
-  # Route53 DNS name - reuses base_service_name to respect override_dns_name
-  logical_service_name = var.env == "live" && var.aws_account_alias == "" ? local.base_service_name : "${local.fixed_env_name}-${local.base_service_name}"
+module "route53_name" {
+  source = "./modules/route53_name"
 
-  full_account_name         = can(regex("^live(_.+)?$", var.env)) ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."
-  backend_dns_domain        = "${local.full_account_name}${var.backend_dns}"
-  backend_dns_record        = "${local.logical_service_name}.${local.backend_dns_domain}"
-  simple_backend_dns_record = "${local.env_prefix}${local.base_service_name}.${local.backend_dns_domain}"
+  env               = var.env
+  aws_account_alias = var.aws_account_alias
+  backend_dns       = var.backend_dns
+  base_service_name = local.base_service_name
+  simple_dns_name   = var.simple_dns_name
 }
 
 data "aws_route53_zone" "dns_domain" {
-  name = local.backend_dns_domain
+  name = module.route53_name.backend_dns_domain
 }
 
 resource "aws_route53_record" "dns_record" {
   zone_id = data.aws_route53_zone.dns_domain.zone_id
-  name    = var.simple_dns_name ? local.simple_backend_dns_record : local.backend_dns_record
+  name    = module.route53_name.record_name
 
   type            = "CNAME"
   records         = [var.alb_dns_name]
