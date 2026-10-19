@@ -23,7 +23,7 @@ variable "backend_dns" {
   type        = string
 }
 
-# Environment name, e.g. "live", "qa", "live_eu-west-2".
+# Environment name, e.g. "live", "qa", "live_eu_west_2".
 # - Non-live envs are prefixed to the DNS name (qa -> "qa-<name>"); underscores become hyphens.
 # - "live" (exact) has no ALB host prefix. "live_<region>" drops "live" and keeps the region (live_eu_west_2 -> eu-west-2-<name>).
 # - Only "live" and "live_<suffix>" (underscore) select the "<alias>prod." zone; anything else uses "<alias>dev.".
