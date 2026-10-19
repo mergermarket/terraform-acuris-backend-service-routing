@@ -1,3 +1,4 @@
+import re
 import unittest
 from subprocess import check_call, check_output
 
@@ -117,59 +118,6 @@ Plan: 2 to add, 0 to change, 0 to destroy.
               + regex_values = []
               + values       = [
                   + "cognito.domain.com",
-                ]
-            }
-        }
-      + condition {
-
-          + path_pattern {
-              + regex_values = []
-              + values       = [
-                  + "*",
-                ]
-            }
-        }
-    }
-        """.strip() in output
-
-    def test_create_alb_listener_rule_live_secondary_region(self):
-        # When
-        output = check_output([
-            'terraform',
-            'plan',
-            '-var', 'env=live_eu_west_2',
-            '-var', 'aws_account_alias=awsaccount',
-            '-var', 'backend_dns=testbackend.com',
-            '-var-file=test/platform-config/eu-west-1.json',
-            '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
-            '-no-color',
-            'test/infra'
-        ]).decode('utf-8')
-
-        print(output)
-
-        # Then
-        assert """
-  # module.backend_service_routing.aws_alb_listener_rule.rule will be created
-  + resource "aws_alb_listener_rule" "rule" {
-      + arn          = (known after apply)
-      + id           = (known after apply)
-      + listener_arn = "arn:aws:alb:eu-west-1:123456789123:alb:listener"
-      + priority     = 10
-      + region       = "eu-west-1"
-      + tags_all     = (known after apply)
-
-      + action {
-          + order            = (known after apply)
-          + target_group_arn = (known after apply)
-          + type             = "forward"
-        }
-
-      + condition {
-          + host_header {
-              + regex_values = []
-              + values       = [
-                  + "eu-west-2-cognito.domain.com",
                 ]
             }
         }
@@ -397,3 +345,46 @@ Plan: 2 to add, 0 to change, 0 to destroy.
           + unhealthy_draining_interval             = (known after apply)
         }
     }    """.strip() in output
+
+
+class TestListenerHostMatchesDnsName(unittest.TestCase):
+    """With simple_dns_name the ALB host header must match the simplified Route53 name."""
+
+    def setUp(self):
+        check_call(['terraform', 'init', 'test/infra'])
+
+    def host_values(self, env, simple):
+        output = check_output([
+            'terraform', 'plan',
+            '-var', 'env=%s' % env,
+            '-var', 'aws_account_alias=awsaccount',
+            '-var', 'backend_dns=testbackend.com',
+            '-var', 'simple_dns_name=%s' % str(simple).lower(),
+            '-var-file=test/platform-config/eu-west-1.json',
+            '-target=module.backend_service_routing.aws_alb_listener_rule.rule',
+            '-no-color',
+            'test/infra'
+        ]).decode('utf-8')
+        block = output.split('host_header {')[1].split('}')[0]
+        return re.findall(r'"([^"]+)"', block)
+
+    def test_simple_dns_name_true(self):
+        cases = {
+            'live': 'cognito.domain.com',
+            'live_eu-west-2': 'eu-west-2-cognito.domain.com',
+            'live-eu-west-2': 'eu-west-2-cognito.domain.com',
+            'qa': 'qa-cognito.domain.com',
+        }
+        for env, host in cases.items():
+            with self.subTest(env=env):
+                assert self.host_values(env, True) == [host]
+
+    def test_simple_dns_name_false_keeps_env_prefix(self):
+        cases = {
+            'live': 'cognito.domain.com',
+            'live_eu-west-2': 'live-eu-west-2-cognito.domain.com',
+            'qa': 'qa-cognito.domain.com',
+        }
+        for env, host in cases.items():
+            with self.subTest(env=env):
+                assert self.host_values(env, False) == [host]
