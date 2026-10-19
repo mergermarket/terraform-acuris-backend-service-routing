@@ -104,7 +104,7 @@ Notes:
 
 - With `env = "live"` and an empty `aws_account_alias`, both modes give `cognito.<backend_dns>`.
 - Only `live` and `live_<suffix>` (underscore) select the `<alias>prod.` zone; a hyphenated `live-<suffix>` env resolves to `<alias>dev.`.
-- `simple_dns_name` only affects the Route53 record. The ALB listener host-header rule still uses the environment prefix (e.g. `live-eu-west-2-cognito.<dns_domain>`), so add the Route53 name to `extra_listener_host_names` if clients will call the service by it.
+- `simple_dns_name` applies to both the Route53 record and the ALB listener host-header rule, so the rule matches the record (e.g. `eu-west-2-cognito.<dns_domain>` for `live_eu-west-2`). Note the host uses `dns_domain` while the record lives under `backend_dns`.
 
 Testing
 -------
