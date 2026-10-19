@@ -1,6 +1,6 @@
+import re
 import unittest
 from subprocess import check_call, check_output
-from urllib.parse import urlparse
 
 
 class TestTFBackendRouter(unittest.TestCase):
@@ -366,16 +366,7 @@ class TestListenerHostMatchesDnsName(unittest.TestCase):
             'test/infra'
         ]).decode('utf-8')
         block = output.split('host_header {')[1].split('}')[0]
-        values = []
-        for l in block.splitlines():
-            value = l.strip().lstrip('+ ').strip('",')
-            if not value:
-                continue
-            parsed = urlparse(value if '://' in value else 'https://' + value)
-            host = parsed.hostname
-            if host and (host == 'domain.com' or host.endswith('.domain.com')):
-                values.append(value)
-        return values
+        return re.findall(r'"([^"]+)"', block)
 
     def test_simple_dns_name_true(self):
         cases = {
