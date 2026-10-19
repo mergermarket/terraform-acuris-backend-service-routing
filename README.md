@@ -75,41 +75,30 @@ module "cognito_service" {
 
 This will be used consistently for both the ALB listener host header and the Route53 DNS record.
 
-### Simple Route53 DNS Names
+### Regional live environments and `simple_dns_name`
 
-By default the Route53 record is prefixed with the environment, so a regional live environment such as `live_eu-west-2` gets `live-eu-west-2-name`. Set `simple_dns_name = true` to drop the `live-` part and keep only the region:
+Secondary live regions (`live_<region>`, e.g. `live_eu_west_2`) drop the `live` part from both the ALB host header and the Route53 record, leaving the region. Underscores become hyphens.
 
-```hcl
-module "cognito_service" {
-    source  = "mergermarket/backend-service-routing/acuris"
-    version = "0.0.2"
+`simple_dns_name = true` removes the remaining `live-` prefix from the Route53 record of the primary `live` environment. The ALB host header and Route53 record always use the same name for regional envs.
 
-    env               = var.env  # e.g. "live_eu-west-2"
-    component_name    = "cognito-service"
-    simple_dns_name   = true
-    # ... other variables as above
-}
-```
+Examples for component `cognito-service` (`aws_account_alias = "acme"`, `backend_dns = "example.com"`):
 
-Resulting Route53 record name for component `cognito-service` (with `aws_account_alias = "acme"`, `backend_dns = "example.com"`):
-
-| `env`            | `simple_dns_name = false`                          | `simple_dns_name = true`                     |
-|------------------|----------------------------------------------------|----------------------------------------------|
-| `live`           | `live-cognito.acmeprod.example.com`                | `cognito.acmeprod.example.com`               |
-| `live_eu-west-2` | `live-eu-west-2-cognito.acmeprod.example.com`      | `eu-west-2-cognito.acmeprod.example.com`     |
-| `live-eu-west-2` | `live-eu-west-2-cognito.acmedev.example.com`       | `eu-west-2-cognito.acmedev.example.com`      |
-| `qa`             | `qa-cognito.acmedev.example.com`                   | `qa-cognito.acmedev.example.com`             |
+| `env`            | ALB host (`dns_domain`) | Route53 record, `simple_dns_name = false` | Route53 record, `simple_dns_name = true` |
+|------------------|-------------------------|-------------------------------------------|------------------------------------------|
+| `live`           | `cognito`               | `live-cognito.acmeprod.example.com`       | `cognito.acmeprod.example.com`           |
+| `live_eu_west_2` | `eu-west-2-cognito`     | `eu-west-2-cognito.acmeprod.example.com`  | `eu-west-2-cognito.acmeprod.example.com` |
+| `qa`             | `qa-cognito`            | `qa-cognito.acmedev.example.com`          | `qa-cognito.acmedev.example.com`         |
 
 Notes:
 
 - With `env = "live"` and an empty `aws_account_alias`, both modes give `cognito.<backend_dns>`.
-- Only `live` and `live_<suffix>` (underscore) select the `<alias>prod.` zone; a hyphenated `live-<suffix>` env resolves to `<alias>dev.`.
-- `simple_dns_name` applies to both the Route53 record and the ALB listener host-header rule, so the rule matches the record (e.g. `eu-west-2-cognito.<dns_domain>` for `live_eu-west-2`). Note the host uses `dns_domain` while the record lives under `backend_dns`.
+- Only `live` and `live_<suffix>` (underscore) are treated as live; they select the `<alias>prod.` zone. A hyphenated env such as `live-eu-west-2` is not treated as live.
+- The ALB host uses `dns_domain` while the record lives under `backend_dns`.
 
 Testing
 -------
 
-Tests run in Docker with `test/run.sh`. `test/test_naming.py` covers the Route53 naming rules (`modules/route53_name`) without calling AWS.
+Tests run in Docker with `test/run.sh`. `test/test_naming.py` covers the host and Route53 naming rules (`modules/naming`) without calling AWS.
 
 Architecture
 ------------

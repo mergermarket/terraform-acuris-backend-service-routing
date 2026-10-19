@@ -25,9 +25,8 @@ variable "backend_dns" {
 
 # Environment name, e.g. "live", "qa", "live_eu-west-2".
 # - Non-live envs are prefixed to the DNS name (qa -> "qa-<name>"); underscores become hyphens.
-# - "live" (exact) has no ALB host prefix. "live_<region>" / "live-<region>" keep the prefix on the ALB host name
-#   (live-eu-west-2-<name>.<dns_domain>); see simple_dns_name for the Route53 record.
-# - Only "live" and "live_<suffix>" (underscore) select the "<alias>prod." zone; "live-<suffix>" uses "<alias>dev.".
+# - "live" (exact) has no ALB host prefix. "live_<region>" drops "live" and keeps the region (live_eu_west_2 -> eu-west-2-<name>).
+# - Only "live" and "live_<suffix>" (underscore) select the "<alias>prod." zone; anything else uses "<alias>dev.".
 variable "env" {
   description = "The name of the environment (included at the front of the DNS name with a hyphen if not live)"
 }
@@ -149,11 +148,11 @@ variable "extra_listener_http_header_pairs" {
   default     = []
 }
 
-# Shorter Route53 record name; the ALB host-header rule uses the same prefix so it matches the record. With component "cognito":
-#   env               simple_dns_name=false             simple_dns_name=true
-#   live              live-cognito (alias set)          cognito
-#   live_eu-west-2    live-eu-west-2cognito             eu-west-2-cognito (region kept, "live-" dropped)
-#   qa                qa-cognito                        qa-cognito
+# Drops the "live-" prefix from the Route53 record of the primary live env. With component "cognito":
+#   env             simple_dns_name=false   simple_dns_name=true
+#   live            live-cognito            cognito   (with aws_account_alias set)
+#   live_eu_west_2  eu-west-2-cognito       eu-west-2-cognito   (regional live envs never carry "live-")
+#   qa              qa-cognito              qa-cognito
 # With env "live" and no aws_account_alias both modes give "cognito".
 variable "simple_dns_name" {
   description = "simplify the name of route53 dns in live env"
