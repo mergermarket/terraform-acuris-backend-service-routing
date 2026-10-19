@@ -149,10 +149,10 @@ variable "extra_listener_http_header_pairs" {
   default     = []
 }
 
-# Shorter Route53 record name (ALB host-header rule is unaffected). With component "cognito":
+# Shorter Route53 record name; the ALB host-header rule uses the same prefix so it matches the record. With component "cognito":
 #   env               simple_dns_name=false             simple_dns_name=true
 #   live              live-cognito (alias set)          cognito
-#   live_eu-west-2    live-eu-west-2cognito             eu-west-2-cognito   (region kept, "live-" dropped)
+#   live_eu-west-2    live-eu-west-2cognito             eu-west-2-cognito (region kept, "live-" dropped)
 #   qa                qa-cognito                        qa-cognito
 # With env "live" and no aws_account_alias both modes give "cognito".
 variable "simple_dns_name" {

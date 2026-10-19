@@ -7,7 +7,7 @@ locals {
   env_prefix     = var.env == "live" ? "" : "${local.fixed_env_name}-"
 
   # ALB listener host name
-  target_host_name       = "${local.env_prefix}${local.base_service_name}.${var.dns_domain}"
+  target_host_name       = "${module.route53_name.host_env_prefix}${local.base_service_name}.${var.dns_domain}"
   host_header_host_names = concat([local.target_host_name], var.extra_listener_host_names)
 }
 

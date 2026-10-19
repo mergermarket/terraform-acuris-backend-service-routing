@@ -35,3 +35,8 @@ output "backend_dns_domain" {
 output "record_name" {
   value = var.simple_dns_name ? local.simple_backend_dns_record : local.backend_dns_record
 }
+
+# Prefix for the ALB host-header name so the listener rule matches the Route53 record
+output "host_env_prefix" {
+  value = var.simple_dns_name ? local.simple_env_prefix : local.env_prefix
+}
