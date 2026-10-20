@@ -17,6 +17,12 @@ For the non-live environments this will be:
     env-name.domain
 ```
 
+For secondary live environments (`live_<region>`, e.g. `live_eu-west-2`) the ALB host header is prefixed with the region only, omitting `live-`:
+
+```plain
+    region-name.domain
+```
+
 This is intended for use in a backend router component e.g. one using <https://github.com/mergermarket/terraform-acuris-backend-router>.
 
 Usage
@@ -74,6 +80,16 @@ module "cognito_service" {
 ```
 
 This will be used consistently for both the ALB listener host header and the Route53 DNS record.
+
+### Route53 DNS names
+
+The Route53 CNAME is created in the `backend_dns` zone (`<aws_account_alias>prod.` for `live` and `live_*` envs, `<aws_account_alias>dev.` otherwise). Examples for `component_name = "foo-service"` and `aws_account_alias = "acme"`:
+
+| `env` | default | `simple_dns_name = true` |
+|---|---|---|
+| `live` | `live-foo.acmeprod.<backend_dns>` (`foo.<backend_dns>` if the alias is empty) | `foo.acmeprod.<backend_dns>` |
+| `live_eu-west-2` | `live-eu-west-2-foo.acmeprod.<backend_dns>` | `eu-west-2-foo.acmeprod.<backend_dns>` |
+| `qa` | `qa-foo.acmedev.<backend_dns>` | `qa-foo.acmedev.<backend_dns>` |
 
 Architecture
 ------------
