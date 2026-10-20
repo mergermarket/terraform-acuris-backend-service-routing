@@ -4,7 +4,10 @@ locals {
 
   # Environment handling
   fixed_env_name = replace(var.env, "_", "-")
-  env_prefix     = var.env == "live" ? "" : "${local.fixed_env_name}-"
+  is_live_env    = can(regex("^live(_.+)?$", var.env))
+  # secondary live envs (live_<region>) are prefixed with the region only, without "live-"
+  live_region_name = replace(local.fixed_env_name, "/^live-/", "")
+  env_prefix       = var.env == "live" ? "" : (local.is_live_env ? "${local.live_region_name}-" : "${local.fixed_env_name}-")
 
   # ALB listener host name
   target_host_name       = "${local.env_prefix}${local.base_service_name}.${var.dns_domain}"
@@ -89,7 +92,7 @@ locals {
   # Route53 DNS name - reuses base_service_name to respect override_dns_name
   logical_service_name = var.env == "live" && var.aws_account_alias == "" ? local.base_service_name : "${local.fixed_env_name}-${local.base_service_name}"
 
-  full_account_name         = can(regex("^live(_.+)?$", var.env)) ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."
+  full_account_name         = local.is_live_env ? (var.aws_account_alias == "" ? "" : "${var.aws_account_alias}prod.") : "${var.aws_account_alias}dev."
   backend_dns_domain        = "${local.full_account_name}${var.backend_dns}"
   backend_dns_record        = "${local.logical_service_name}.${local.backend_dns_domain}"
   simple_backend_dns_record = "${local.env_prefix}${local.base_service_name}.${local.backend_dns_domain}"
