@@ -11,6 +11,7 @@ module "backend_service_routing" {
   vpc_id            = var.platform_config["vpc"]
   aws_account_alias = var.aws_account_alias
   backend_dns       = var.backend_dns
+  simple_dns_name   = var.simple_dns_name
 
   extra_listener_host_names        = var.extra_listener_host_names
   extra_listener_http_header_pairs = var.extra_listener_http_header_pairs
@@ -47,6 +48,11 @@ variable "platform_config" {
 variable "aws_account_alias" {}
 
 variable "backend_dns" {}
+
+variable "simple_dns_name" {
+  type    = bool
+  default = false
+}
 
 variable "extra_listener_host_names" {
   type    = list(string)
